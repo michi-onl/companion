@@ -11,9 +11,24 @@ pnpm build          # Production build
 pnpm lint           # Run ESLint
 pnpm test           # Run tests in watch mode (vitest)
 pnpm test:run       # Run tests once (CI)
+pnpm preview        # Build + serve in the Cloudflare Workers runtime (workerd)
+pnpm deploy         # Build + deploy the Worker
+pnpm cf-typegen     # Regenerate cloudflare-env.d.ts from wrangler.jsonc
 ```
 
-**Linting:** `pnpm lint` runs `eslint .` directly. The previous Next.js 16.1.6 / eslint 10 incompatibility has been resolved by upgrading to Next.js 16.3.0 and eslint 9.x. eslint is deliberately held at 9.x — the 10.x major has not been verified against `eslint-config-next`.
+**Linting:** `pnpm lint` runs `eslint .` directly. The previous Next.js 16.1.6 / eslint 10 incompatibility has been resolved by upgrading to Next.js 16.3.x and eslint 9.x. eslint is deliberately held at 9.x — the 10.x major has not been verified against `eslint-config-next`. `cloudflare-env.d.ts` and `.open-next/**` are ignored.
+
+## Deployment
+
+Deployed as a Cloudflare Worker at `helldivers.michi.onl` via the **OpenNext** adapter (`@opennextjs/cloudflare`). CI/CD is Cloudflare Workers Builds (connect the Worker to the repo in the dashboard); no GitHub Actions deploy job. `wrangler.jsonc` owns the Worker name, bindings and custom domain; `open-next.config.ts` owns the cache.
+
+- **Incremental cache:** R2 bucket `companion-next-cache` + a Durable Object revalidation queue (`DOQueueHandler`), with the long-lived regional cache. This backs the `fetch(..., { next: { revalidate } })` times in `lib/api/endpoints.ts`.
+- **No tag cache:** the app never calls `revalidateTag`/`revalidatePath`.
+- **Images:** `images.unoptimized` is set; Cloudflare image optimization is a paid binding and all assets are local.
+- **Compatibility date/flags:** `2026-09-19`, `nodejs_compat`, `global_fetch_strictly_public`.
+- **Secrets:** none. `.dev.vars` only sets `NEXTJS_ENV`.
+
+The `DOQueueHandler` "not exported" warning during `build`/`preview` is the documented OpenNext known issue and safe to ignore — it is not used at build time.
 
 ## Architecture
 

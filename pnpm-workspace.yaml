@@ -3,10 +3,17 @@ overrides:
   # bypass and an NTLMv2 hash disclosure (both Windows-only, dev-only).
   vite: ">=8.0.16"
 allowBuilds:
+  esbuild: true
   sharp: true
   unrs-resolver: true
+  workerd: true
 onlyBuiltDependencies:
   - "@tailwindcss/oxide"
   - "@vercel/speed-insights"
+  - esbuild
   - sharp
   - unrs-resolver
+  - workerd
+minimumReleaseAgeExclude:
+  - miniflare@5.20260918.0-alpha
+  - wrangler@4.135.0
