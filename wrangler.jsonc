@@ -29,7 +29,6 @@
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "companion-next-cache",
-      "remote": true,
     },
   ],
   "durable_objects": {
